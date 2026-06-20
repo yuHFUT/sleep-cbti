@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+android-apk/app-unsigned.apk
+android-apk/app-debug.apk
+android-apk/obj/
+android-apk/assets/
+android-apk/classes.dex
+android-apk/debug.keystore
+android-apk/package.json
+android-apk/package-lock.json
+android-apk/node_modules/
+android-apk/res/
+*.zip
+*.tar.gz

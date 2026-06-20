@@ -1,0 +1,37 @@
+{
+  "name": "sleep-cbti-client",
+  "version": "1.0.0",
+  "description": "睡益良方 CBT-I 前端应用",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "CBT-I",
+    "sleep",
+    "health",
+    "vue"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vitejs/plugin-legacy": "^8.0.2",
+    "axios": "^1.18.0",
+    "pinia": "^3.0.4",
+    "terser": "^5.48.0",
+    "vue": "^3.5.38",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/test-utils": "^2.4.11",
+    "jsdom": "^29.1.1",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.9"
+  }
+}

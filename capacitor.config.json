@@ -1,0 +1,8 @@
+{
+  "appId": "com.sleepcbti.app",
+  "appName": "??��??",
+  "webDir": "client/dist",
+  "android": {
+    "allowMixedContent": true
+  }
+}
