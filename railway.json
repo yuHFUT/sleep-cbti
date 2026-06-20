@@ -1,9 +1,9 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "cd client && npm ci && npm run build"
+    "buildCommand": "cd server && npm ci && cd ../client && npm ci && npm run build"
   },
   "deploy": {
-    "startCommand": "cd server && npm start"
+    "startCommand": "cd server && node src/index.js"
   }
 }

@@ -1,4 +1,14 @@
 {
+  "name": "sleep-cbti",
+  "private": true,
+  "scripts": {
+    "build:client": "cd client && npm ci && npm run build",
+    "start": "cd server && npm start",
+    "install:all": "cd client && npm ci && cd ../server && npm ci"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
     "@capacitor/cli": "^8.4.1",
