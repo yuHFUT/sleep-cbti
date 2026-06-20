@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>你的睡眠债欠了多少？</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ====== 验证码弹窗 ====== -->
+<div id="captchaOverlay">
+  <div class="captcha-box">
+    <p class="captcha-title">🤖 请先完成人机验证</p>
+    <p class="captcha-question" id="captchaQuestion"></p>
+    <input type="number" class="captcha-input" id="captchaInput" placeholder="输入答案" autocomplete="off">
+    <button class="captcha-btn" id="captchaBtn">验证</button>
+    <p class="captcha-hint" id="captchaHint"></p>
+  </div>
+</div>
+
+<!-- ====== 背景星空画布 ====== -->
+<canvas id="starCanvas"></canvas>
+
+<!-- ====== 漂浮元素容器 ====== -->
+<div id="floatingElements">
+  <div class="float-icon pillow1">🛏️</div>
+  <div class="float-icon pillow2">💤</div>
+  <div class="float-icon clock1">⏰</div>
+  <div class="float-icon moon1">🌙</div>
+  <div class="float-icon star1">⭐</div>
+  <div class="float-icon tea1">🍵</div>
+</div>
+
+<!-- ====== 主容器 ====== -->
+<div id="appContainer">
+
+  <!-- ========== 第0屏：着陆页 ========== -->
+  <section id="screen-landing" class="screen active">
+    <div class="landing-content">
+      <div class="landing-badge">🧬 数字科普 · H5互动测评</div>
+      <h1 class="landing-title">
+        <span class="title-line1">你的睡眠债</span>
+        <span class="title-line2">欠了多少？</span>
+      </h1>
+      <p class="landing-subtitle">测测你的睡眠健康分 —— 科学还清睡眠债</p>
+
+      <div class="landing-features">
+        <div class="feature-chip">📋 3大量表整合</div>
+        <div class="feature-chip">🎯 PSQI + SHPS + DBAS-16</div>
+        <div class="feature-chip">📊 可视化报告</div>
+      </div>
+
+      <div class="consent-box">
+        <label class="consent-label" onclick="toggleConsent()">
+          <span class="consent-check" id="consentCheck">☐</span>
+          <span class="consent-text">我已阅读并同意《知情同意书》：本测评仅供参考，不构成医学诊断。所填信息仅用于生成个人睡眠报告，不会上传服务器。</span>
+        </label>
+      </div>
+
+      <button class="btn-start" id="btnStart" disabled onclick="startAssessment()">
+        立即测评 →
+      </button>
+    </div>
+  </section>
+
+  <!-- ========== 第1屏：第一关 - PSQI ========== -->
+  <section id="screen-stage1" class="screen">
+    <div class="stage-header">
+      <div class="stage-badge">第一关</div>
+      <h2 class="stage-title">睡眠质量真相</h2>
+      <p class="stage-desc">基于匹兹堡睡眠质量指数（PSQI）</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress1"></div></div>
+        <span class="progress-text">完成度 <span id="progressText1">0</span>%</span>
+      </div>
+    </div>
+    <div class="quiz-area" id="quizStage1"></div>
+    <div class="stage-nav">
+      <button class="btn-prev" onclick="prevQuestion(1)" style="display:none">上一题</button>
+      <button class="btn-next" id="btnNext1" onclick="nextQuestion(1)">下一题</button>
+    </div>
+    <div class="fun-illustration" id="illust1"></div>
+  </section>
+
+  <!-- ========== 第2屏：第二关 - SHPS ========== -->
+  <section id="screen-stage2" class="screen">
+    <div class="stage-header">
+      <div class="stage-badge">第二关</div>
+      <h2 class="stage-title">我的睡眠习惯</h2>
+      <p class="stage-desc">基于睡眠卫生习惯量表（SHPS）</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress2"></div></div>
+        <span class="progress-text">完成度 <span id="progressText2">0</span>%</span>
+      </div>
+    </div>
+    <div class="quiz-area" id="quizStage2"></div>
+    <div class="stage-nav">
+      <button class="btn-prev" onclick="prevQuestion(2)">上一题</button>
+      <button class="btn-next" id="btnNext2" onclick="nextQuestion(2)">下一题</button>
+    </div>
+  </section>
+
+  <!-- ========== 第3屏：第三关 - DBAS-16 ========== -->
+  <section id="screen-stage3" class="screen">
+    <div class="stage-header">
+      <div class="stage-badge">第三关</div>
+      <h2 class="stage-title">睡眠信念解码</h2>
+      <p class="stage-desc">基于睡眠信念与态度量表（DBAS-16）</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress3"></div></div>
+        <span class="progress-text">完成度 <span id="progressText3">0</span>%</span>
+      </div>
+    </div>
+    <div class="quiz-area" id="quizStage3"></div>
+    <div class="stage-nav">
+      <button class="btn-prev" onclick="prevQuestion(3)">上一题</button>
+      <button class="btn-next" id="btnNext3" onclick="nextQuestion(3)">下一题</button>
+    </div>
+    <!-- 认知扭曲雷达图 -->
+    <div class="radar-preview" id="radarPreview" style="display:none">
+      <h3>🧠 认知扭曲雷达图</h3>
+      <canvas id="radarCanvas" width="280" height="280"></canvas>
+      <div class="radar-legend">
+        <span>后果夸大</span><span>失控担忧</span><span>僵化期望</span><span>药物依赖</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 第4屏：结果报告 ========== -->
+  <section id="screen-result" class="screen">
+    <div class="result-header">
+      <h2 class="result-title">🔬 你的睡眠健康报告</h2>
+      <p class="result-date" id="resultDate"></p>
+    </div>
+
+    <a href="scales-reference.html" class="scale-ref-link">📋 查看评分标准：PSQI · SHPS · DBAS-16 量表详解 →</a>
+
+    <!-- 总分 -->
+    <div class="score-hero">
+      <div class="score-circle" id="scoreCircle">
+        <span class="score-number" id="scoreNumber">--</span>
+        <span class="score-unit">分</span>
+      </div>
+      <p class="score-label" id="scoreLabel"></p>
+    </div>
+
+    <!-- 睡眠存钱罐 -->
+    <div class="piggy-bank" id="piggyBank">
+      <div class="jar">
+        <div class="jar-glass">
+          <div class="coins-stack" id="coinsStack">
+            <span class="coin">🪙</span><span class="coin">🪙</span><span class="coin">🪙</span>
+            <span class="coin">🪙</span><span class="coin">🪙</span><span class="coin">🪙</span>
+            <span class="coin">🪙</span><span class="coin">🪙</span><span class="coin">🪙</span>
+            <span class="coin">🪙</span>
+          </div>
+          <div class="jar-label">💎 睡眠储蓄罐</div>
+        </div>
+      </div>
+      <p class="jar-desc" id="jarDesc"></p>
+    </div>
+
+    <!-- 分项解析 -->
+    <div class="sub-scores">
+      <h3>📊 分项解析</h3>
+      <div class="sub-score-item" id="subSleep">
+        <span class="sub-label">😴 入睡效率</span>
+        <div class="sub-bar-wrap"><div class="sub-bar" id="barSleep"></div></div>
+        <span class="sub-val" id="valSleep">--</span>
+      </div>
+      <div class="sub-score-item" id="subDuration">
+        <span class="sub-label">⏱️ 睡眠时长</span>
+        <div class="sub-bar-wrap"><div class="sub-bar" id="barDuration"></div></div>
+        <span class="sub-val" id="valDuration">--</span>
+      </div>
+      <div class="sub-score-item" id="subHabit">
+        <span class="sub-label">⚠️ 习惯风险</span>
+        <div class="sub-bar-wrap"><div class="sub-bar bar-warn" id="barHabit"></div></div>
+        <span class="sub-val" id="valHabit">--</span>
+      </div>
+      <div class="sub-score-item" id="subCognition">
+        <span class="sub-label">🧠 认知偏差</span>
+        <div class="sub-bar-wrap"><div class="sub-bar bar-cog" id="barCognition"></div></div>
+        <span class="sub-val" id="valCognition">--</span>
+      </div>
+    </div>
+
+    <!-- 海报分享按钮 -->
+    <button class="btn-poster" onclick="generatePoster()">📸 一键生成分享海报</button>
+
+    <!-- 指导卡片 -->
+    <div class="guidance-section" id="guidanceSection">
+      <h3>💡 个性化睡眠改善方案（基于CBT-I）</h3>
+      <div id="guidanceCards"></div>
+    </div>
+
+    <button class="btn-retry" onclick="restartAll()">🔄 重新测评</button>
+  </section>
+
+  <!-- ========== 海报弹窗 ========== -->
+  <div class="poster-overlay" id="posterOverlay" style="display:none">
+    <div class="poster-card" id="posterCard">
+      <div class="poster-bg">
+        <h2 class="poster-title">我的睡眠健康分</h2>
+        <div class="poster-score" id="posterScore">--</div>
+        <p class="poster-tagline">你的睡眠债欠了多少？</p>
+        <div class="poster-advice" id="posterAdvice"></div>
+        <div class="poster-qr">也来测测你的睡眠健康得分吧！</div>
+      </div>
+      <button class="btn-close-poster" onclick="closePoster()">✕</button>
+      <button class="btn-save-poster" onclick="savePoster()">💾 保存图片</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
