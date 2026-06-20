@@ -1,0 +1,14 @@
+{
+  "name": "睡益良方 - CBT-I 数字疗法助手",
+  "short_name": "睡益良方",
+  "description": "大学生CBT-I数字疗法助手 — 不靠药物，用行为改变赢回睡眠",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#4a6fa5",
+  "theme_color": "#4a6fa5",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

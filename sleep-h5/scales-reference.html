@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>睡眠量表汇总 — PSQI · SHPS · DBAS-16</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-deep: #0a0d2e;
+    --bg-card: rgba(20, 24, 62, 0.92);
+    --bg-card-solid: #14183e;
+    --accent: #7c5ce7;
+    --accent2: #4ec9e0;
+    --accent3: #f7a641;
+    --danger: #e0556a;
+    --success: #3ecf8e;
+    --text: #e8e8f0;
+    --text-dim: #9090b0;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(0,0,0,.4);
+    --font: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  }
+
+  html, body {
+    width: 100%; min-height: 100%;
+    font-family: var(--font);
+    background: var(--bg-deep);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* 星空背景 */
+  #starCanvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 800px; margin: 0 auto; padding: 20px 16px 60px;
+  }
+
+  /* 顶部导航 */
+  .top-nav {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 20px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+    color: var(--text); font-size: .85rem; cursor: pointer;
+    text-decoration: none; transition: background .2s;
+  }
+  .btn-back:hover { background: rgba(255,255,255,.12); }
+  .top-nav .badge {
+    font-size: .78rem; color: var(--accent2);
+    background: rgba(78,201,224,.1); padding: 4px 12px; border-radius: 12px;
+  }
+
+  /* 标题 */
+  h1 {
+    font-size: 1.6rem; margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .subtitle { color: var(--text-dim); font-size: .85rem; margin-bottom: 24px; }
+
+  /* 章节 */
+  h2 {
+    font-size: 1.25rem; color: var(--accent2); margin: 36px 0 12px;
+    padding-left: 12px; border-left: 3px solid var(--accent2);
+  }
+  h3 {
+    font-size: 1.05rem; color: var(--text); margin: 20px 0 10px;
+  }
+  h4 {
+    font-size: .92rem; color: var(--accent3); margin: 16px 0 8px;
+  }
+
+  /* 卡片 */
+  .card {
+    background: var(--bg-card); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 16px;
+    box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,.06);
+  }
+
+  /* 表格 */
+  .table-wrap {
+    overflow-x: auto; margin: 12px 0 20px;
+    border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,.08);
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: .78rem; min-width: 600px;
+  }
+  th {
+    background: rgba(124,92,231,.2);
+    padding: 10px 12px; text-align: left;
+    font-weight: 700; color: var(--accent2); white-space: nowrap;
+  }
+  td {
+    padding: 9px 12px; border-top: 1px solid rgba(255,255,255,.06);
+    color: var(--text-dim); vertical-align: top;
+  }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  td:first-child { color: var(--accent3); font-weight: 600; white-space: nowrap; }
+
+  /* 引用 */
+  blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 8px 16px; margin: 12px 0;
+    background: rgba(124,92,231,.06); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: .82rem; color: var(--text-dim);
+  }
+
+  /* 强调 */
+  strong { color: var(--accent2); }
+  p { margin-bottom: 10px; font-size: .85rem; color: var(--text-dim); }
+  li { font-size: .83rem; color: var(--text-dim); margin-bottom: 4px; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+
+  .divider {
+    height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
+    margin: 32px 0;
+  }
+
+  /* 对比表高亮 */
+  .compare-table td:first-child { color: var(--text); font-weight: 600; }
+
+  /* 响应式 */
+  @media (max-width: 600px) {
+    h1 { font-size: 1.3rem; }
+    h2 { font-size: 1.1rem; }
+    table { font-size: .72rem; }
+    .container { padding: 12px 10px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starCanvas"></canvas>
+
+<div class="container">
+
+  <!-- 顶部导航 -->
+  <div class="top-nav">
+    <a href="index.html" class="btn-back">← 返回测评</a>
+    <span class="badge">📋 学术参考</span>
+  </div>
+
+  <!-- 标题 -->
+  <h1>睡眠相关量表汇总：PSQI、SHPS、DBAS-16</h1>
+  <p class="subtitle">整理日期：2026-06-19 &nbsp;|&nbsp; 用途：睡眠评估与研究参考</p>
+
+  <div class="divider"></div>
+
+  <!-- ==================== 一、PSQI ==================== -->
+  <h2>一、匹兹堡睡眠质量指数量表（PSQI）</h2>
+
+  <h3>1.1 量表简介</h3>
+  <div class="card">
+    <p><strong>全称</strong>：Pittsburgh Sleep Quality Index（匹兹堡睡眠质量指数）</p>
+    <p><strong>编制者</strong>：Buysse 博士（美国匹兹堡大学精神科），1989年</p>
+    <p><strong>中文版</strong>：刘贤臣等译制并完成信效度检验（1996年）</p>
+    <p><strong>用途</strong>：评定被试者<strong>近1个月</strong>的主观睡眠质量</p>
+    <p><strong>条目数</strong>：19个自评条目 + 5个他评条目（由床伴/室友回答）</p>
+    <p><strong>计分条目</strong>：18个自评条目参与计分（第19个自评条目和5个他评条目不参与计分）</p>
+    <p><strong>完成时间</strong>：约5～10分钟</p>
+  </div>
+
+  <h3>1.2 完整条目内容</h3>
+  <h4>自评条目（19题）</h4>
+  <p><strong>指导语</strong>：下面一些问题是关于您最近1个月的睡眠情况，请选择或填写最符合您近1个月实际情况的答案。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>题号</th><th>条目内容</th><th>回答方式</th></tr>
+    <tr><td>1</td><td>近1个月，晚上<strong>上床睡觉</strong>通常是几点钟？</td><td>填写时间</td></tr>
+    <tr><td>2</td><td>近1个月，从上床到入睡通常需要多少分钟？</td><td>填写分钟数</td></tr>
+    <tr><td>3</td><td>近1个月，通常早上几点<strong>起床</strong>？</td><td>填写时间</td></tr>
+    <tr><td>4</td><td>近1个月，每夜通常<strong>实际睡眠</strong>多少小时（不等于卧床时间）？</td><td>填写小时数</td></tr>
+    <tr><td>5a</td><td>近1个月，因<strong>入睡困难</strong>（30分钟内不能入睡）而影响睡眠</td><td>0=无, 1=&lt;1次/周, 2=1~2次/周, 3=≥3次/周</td></tr>
+    <tr><td>5b</td><td>近1个月，因<strong>夜间易醒或早醒</strong>而影响睡眠</td><td>同上</td></tr>
+    <tr><td>5c</td><td>近1个月，因<strong>夜间去厕所</strong>而影响睡眠</td><td>同上</td></tr>
+    <tr><td>5d</td><td>近1个月，因<strong>呼吸不畅</strong>而影响睡眠</td><td>同上</td></tr>
+    <tr><td>5e</td><td>近1个月，因<strong>咳嗽或鼾声高</strong>而影响睡眠</td><td>同上</td></tr>
+    <tr><td>5f</td><td>近1个月，因<strong>感觉冷</strong>而影响睡眠</td><td>同上</td></tr>
+    <tr><td>5g</td><td>近1个月，因<strong>感觉热</strong>而影响睡眠</td><td>同上</td></tr>
+    <tr><td>5h</td><td>近1个月，因<strong>做噩梦</strong>而影响睡眠</td><td>同上</td></tr>
+    <tr><td>5i</td><td>近1个月，因<strong>疼痛不适</strong>而影响睡眠</td><td>同上</td></tr>
+    <tr><td>5j</td><td>近1个月，因<strong>其他原因</strong>而影响睡眠（请描述）</td><td>同上</td></tr>
+    <tr><td>6</td><td>近1个月，总的来说，您认为自己的<strong>睡眠质量</strong>如何？</td><td>0=很好, 1=较好, 2=较差, 3=很差</td></tr>
+    <tr><td>7</td><td>近1个月，您使用<strong>催眠药物</strong>（处方或非处方）的情况？</td><td>0=无, 1=&lt;1次/周, 2=1~2次/周, 3=≥3次/周</td></tr>
+    <tr><td>8</td><td>近1个月，您在开车、用餐或社交活动中<strong>难以保持清醒</strong>的情况？</td><td>0=无, 1=&lt;1次/周, 2=1~2次/周, 3=≥3次/周</td></tr>
+    <tr><td>9</td><td>近1个月，您做事情时<strong>精力不足</strong>的程度？</td><td>0=没有, 1=偶尔有, 2=有时有, 3=经常有</td></tr>
+    <tr><td>10</td><td>您是否有<strong>床伴或室友</strong>？</td><td>0=无, 1=在其他房间, 2=同房不同床, 3=同床</td></tr>
+  </table>
+  </div>
+  <blockquote>注：第10题（有无床伴）不参与计分，仅作为他评条目的前提条件。</blockquote>
+
+  <h4>他评条目（5题，由床伴/室友回答）</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>题号</th><th>条目内容</th><th>回答方式</th></tr>
+    <tr><td>10a</td><td>近1个月，有无<strong>高声打鼾</strong>？</td><td>0=无, 1=&lt;1次/周, 2=1~2次/周, 3=≥3次/周</td></tr>
+    <tr><td>10b</td><td>近1个月，睡眠中有无<strong>长时间呼吸暂停</strong>？</td><td>同上</td></tr>
+    <tr><td>10c</td><td>近1个月，睡眠中有无<strong>腿部抽动或痉挛</strong>？</td><td>同上</td></tr>
+    <tr><td>10d</td><td>近1个月，睡眠中有无<strong>意识模糊或定向障碍</strong>？</td><td>同上</td></tr>
+    <tr><td>10e</td><td>近1个月，睡眠中有无<strong>其他不安</strong>（请描述）</td><td>同上</td></tr>
+  </table>
+  </div>
+  <blockquote>注：他评条目不参与计分，作为临床参考信息。</blockquote>
+
+  <h3>1.3 计分方法：7个成分</h3>
+  <p>PSQI 将18个参与计分的自评条目组合成 <strong>7个成分</strong>，每个成分按 <strong>0～3分</strong> 四级计分。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>成分</th><th>名称</th><th>使用条目</th><th>计分规则</th></tr>
+    <tr><td><strong>A</strong></td><td>主观睡眠质量</td><td>条目6</td><td>很好=0, 较好=1, 较差=2, 很差=3</td></tr>
+    <tr><td><strong>B</strong></td><td>入睡时间</td><td>条目2 + 条目5a</td><td>累加：0分→0分；1~2分→1分；3~4分→2分；5~6分→3分</td></tr>
+    <tr><td><strong>C</strong></td><td>睡眠时间</td><td>条目4</td><td>&gt;7h=0分；6~7h=1分；5~6h=2分；&lt;5h=3分</td></tr>
+    <tr><td><strong>D</strong></td><td>睡眠效率</td><td>条目1, 3, 4</td><td>效率 = 实际睡眠时间 ÷ 床上时间 × 100%。&gt;85%=0分；75~84%=1分；65~74%=2分；&lt;65%=3分</td></tr>
+    <tr><td><strong>E</strong></td><td>睡眠障碍</td><td>条目5b~5j</td><td>累加：0分→0分；1~9分→1分；10~18分→2分；19~27分→3分</td></tr>
+    <tr><td><strong>F</strong></td><td>催眠药物使用</td><td>条目7</td><td>无=0分, &lt;1次/周=1分, 1~2次/周=2分, ≥3次/周=3分</td></tr>
+    <tr><td><strong>G</strong></td><td>日间功能障碍</td><td>条目8 + 条目9</td><td>累加：0分→0分；1~2分→1分；3~4分→2分；5~6分→3分</td></tr>
+  </table>
+  </div>
+  <blockquote><strong>总分 = A + B + C + D + E + F + G，范围 0～21分</strong>，分数越高表示睡眠质量越差。</blockquote>
+
+  <h4>关键计算说明</h4>
+  <ul>
+    <li><strong>成分B（入睡时间）</strong>：条目2计分——≤15分钟=0分, 16~30分钟=1分, 31~60分钟=2分, ≥60分钟=3分；条目5a 直接取0~3分；将两者得分相加后按上表转换。</li>
+    <li><strong>成分D（睡眠效率）</strong>：床上时间 = 起床时间(条目3) − 上床时间(条目1)；睡眠效率 = 睡眠时间(条目4) ÷ 床上时间 × 100%。</li>
+  </ul>
+
+  <h3>1.4 结果解读</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>总分</th><th>睡眠质量等级</th><th>含义</th></tr>
+    <tr><td><strong>0～5分</strong></td><td>睡眠质量很好</td><td>无明显睡眠问题</td></tr>
+    <tr><td><strong>6～10分</strong></td><td>睡眠质量还行</td><td>可能存在轻度睡眠问题</td></tr>
+    <tr><td><strong>11～15分</strong></td><td>睡眠质量一般</td><td>可能存在中度睡眠问题</td></tr>
+    <tr><td><strong>16～21分</strong></td><td>睡眠质量很差</td><td>可能存在重度睡眠问题</td></tr>
+  </table>
+  </div>
+
+  <h4>临床切点</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>切点</th><th>灵敏度</th><th>特异度</th><th>来源</th></tr>
+    <tr><td><strong>PSQI &gt; 5</strong></td><td>89.6%</td><td>86.5%</td><td>Buysse 原版研究（1989）</td></tr>
+    <tr><td><strong>PSQI &gt; 7</strong></td><td>98.3%</td><td>90.2%</td><td>刘贤臣中文版研究（1996）</td></tr>
+  </table>
+  </div>
+  <p>失眠症患者通常 <strong>&gt;10分</strong> 才具有诊断参考价值。</p>
+
+  <h3>1.5 信效度</h3>
+  <h4>信度（Reliability）</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>指标</th><th>英文版</th><th>中文版（刘贤臣）</th></tr>
+    <tr><td>内部一致性（Cronbach's α）</td><td>0.83～0.85</td><td>0.84</td></tr>
+    <tr><td>分半信度</td><td>—</td><td>0.87</td></tr>
+    <tr><td>重测信度（2周间隔）</td><td>r = 0.85, p &lt; 0.001</td><td>0.81～0.99</td></tr>
+  </table>
+  </div>
+
+  <h4>效度（Validity）</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>指标</th><th>英文版</th><th>中文版</th></tr>
+    <tr><td>灵敏度</td><td>89.6%</td><td>98.3%</td></tr>
+    <tr><td>特异度</td><td>86.5%</td><td>90.2%</td></tr>
+    <tr><td>诊断一致性（Kappa）</td><td>0.75, p &lt; 0.001</td><td>—</td></tr>
+    <tr><td>结构效度</td><td>良好</td><td>良好</td></tr>
+    <tr><td>区分效度</td><td>可区分病例组与对照组</td><td>可区分病例组与对照组</td></tr>
+  </table>
+  </div>
+
+  <h3>1.6 适用人群与局限性</h3>
+  <h4>适用范围</h4>
+  <ul>
+    <li>睡眠障碍患者（失眠、阻塞性睡眠呼吸暂停等）</li>
+    <li>精神障碍患者（抑郁症、焦虑症、PTSD等）</li>
+    <li>一般人群睡眠质量调查</li>
+    <li>已在老年人群、癌症患者、TBI、COPD、孕期等多群体中验证</li>
+    <li>已被翻译为 <strong>30余种语言</strong></li>
+  </ul>
+  <h4>局限性</h4>
+  <ol>
+    <li>主观自评量表，与多导睡眠图（PSG）、体动记录仪等客观测量相关性有限</li>
+    <li>&gt;5分的通用切点在不同人群中可能有差异（如大学生群体中可能偏高）</li>
+    <li>近年研究倾向于采用 <strong>2因素或3因素模型</strong>（如"睡眠质量""睡眠效率""日间干扰"），而非单一总分</li>
+  </ol>
+
+  <div class="divider"></div>
+
+  <!-- ==================== 二、SHPS ==================== -->
+  <h2>二、睡眠卫生习惯量表（SHPS）</h2>
+
+  <h3>2.1 量表简介</h3>
+  <div class="card">
+    <p><strong>全称</strong>：Sleep Hygiene Practices Scale（睡眠卫生习惯量表）</p>
+    <p><strong>编制者</strong>：林诗淳、杨建铭、许世杰、郑中平（中国台湾）</p>
+    <p><strong>发表时间</strong>：2009年，发表于《临床心理学刊》（ACP, 4(2): 105-115）</p>
+    <p><strong>用途</strong>：评估个体的睡眠相关行为与卫生习惯</p>
+    <p><strong>条目数</strong>：各版本13～21题不等</p>
+    <p><strong>完成时间</strong>：约5～10分钟</p>
+    <p><strong>评分方式</strong>：多采用 Likert 量表（4级、5级或7级），部分条目需反向计分</p>
+  </div>
+
+  <h3>2.2 四维度结构</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>维度</th><th>英文名称</th><th>含义</th><th>涉及内容</th></tr>
+    <tr><td><strong>1</strong></td><td>Schedule / Timing</td><td>睡眠规律性</td><td>上床/起床时间规律、周末-工作日差异、午睡</td></tr>
+    <tr><td><strong>2</strong></td><td>Arousal</td><td>睡前唤醒/焦虑行为</td><td>睡前认知/情绪唤醒、电子设备使用</td></tr>
+    <tr><td><strong>3</strong></td><td>Eating / Substances</td><td>睡前饮食与物质使用</td><td>咖啡因、尼古丁、酒精、夜宵</td></tr>
+    <tr><td><strong>4</strong></td><td>Environment</td><td>睡眠环境</td><td>温度、噪音、光线、床具舒适度</td></tr>
+  </table>
+  </div>
+
+  <h3>2.3 典型条目内容（中文版）</h3>
+  <h4>维度一：睡眠规律性（Schedule）</h4>
+  <ul>
+    <li>上床睡觉时间的规律性（每天固定 vs. 相差&gt;2小时）</li>
+    <li>起床时间的规律性</li>
+    <li>午睡习惯（频率和时长）</li>
+    <li>周末与工作日睡眠时间的差异</li>
+  </ul>
+  <h4>维度二：睡前觉醒（Arousal）</h4>
+  <ul>
+    <li>睡前1-2小时的活动类型（放松活动 vs. 工作/运动/电子设备）</li>
+    <li>睡前停止使用电子设备（手机、电脑、平板）的时间</li>
+    <li>睡前是否处理令自己焦虑/紧张的事务</li>
+    <li>睡眠中醒来后是否能很快再次入睡</li>
+  </ul>
+  <h4>维度三：睡前饮食（Eating/Substances）</h4>
+  <ul>
+    <li>睡前一小时内饮用的饮品（不喝/水/茶或咖啡/含酒精饮品）</li>
+    <li>睡前抽烟习惯</li>
+    <li>睡前是否吃大量食物</li>
+    <li>傍晚后摄入咖啡因（咖啡、茶、可乐等）</li>
+  </ul>
+  <h4>维度四：睡眠环境（Environment）</h4>
+  <ul>
+    <li>卧室温度（理想：18-22℃）</li>
+    <li>卧室噪音水平</li>
+    <li>卧室光线水平</li>
+    <li>床垫和枕头的舒适度</li>
+    <li>卧室是否放置工作/学习相关物品</li>
+    <li>宠物是否干扰睡眠</li>
+  </ul>
+  <h4>附加条目</h4>
+  <ul>
+    <li>是否只有在感到困倦时才上床</li>
+    <li>睡不着时是否离开床去做一些放松的事</li>
+    <li>是否在床上做与睡眠无关的事（看手机、吃东西、工作等）</li>
+  </ul>
+
+  <h3>2.4 计分方式</h3>
+  <h4>一般原则</h4>
+  <ul>
+    <li>每题通常采用 <strong>4点、5点或7点 Likert 量表</strong></li>
+    <li>部分健康条目需 <strong>反向计分</strong>（即健康行为 = 低分，不健康行为 = 高分）</li>
+    <li><strong>总分越高 → 睡眠卫生习惯越差</strong></li>
+  </ul>
+  <h4>参考计分方案</h4>
+  <p><strong>7级计分版本（19题，Penn CBTI版）</strong>：每题 0～7 分（0=从不, 7=总是），总分范围：<strong>0～133</strong></p>
+  <p><strong>5级计分版（13题简化版）</strong>：每题 1～5 分，总分范围：<strong>13～65</strong></p>
+  <p><strong>4级计分版（0～3分，台湾版）</strong>：每题 0～3 分，部分条目反向计分</p>
+
+  <h3>2.5 信效度</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>指标</th><th>数据</th></tr>
+    <tr><td>内部一致性信度</td><td>可接受（α &gt; 0.70）</td></tr>
+    <tr><td>因素效度</td><td>四因素结构在正常睡眠者与失眠者中均稳定</td></tr>
+    <tr><td>效标关联效度</td><td>与 PSQI 呈显著正相关（r = 0.43～0.67）；与 PROMIS-SD 呈显著正相关（r = 0.31～0.61）</td></tr>
+    <tr><td>区分效度</td><td>"焦虑相关行为"维度可有效区分正常睡眠者与失眠者</td></tr>
+  </table>
+  </div>
+
+  <h3>2.6 临床应用</h3>
+  <p>SHPS 主要用于：</p>
+  <ol>
+    <li><strong>评估</strong>个体的睡眠卫生行为模式</li>
+    <li><strong>识别</strong>需改善的不健康睡眠习惯</li>
+    <li>作为 <strong>CBT-I</strong> 中睡眠卫生教育（Sleep Hygiene Education）的基础</li>
+    <li><strong>监测</strong>行为干预效果</li>
+  </ol>
+
+  <div class="divider"></div>
+
+  <!-- ==================== 三、DBAS-16 ==================== -->
+  <h2>三、睡眠信念与态度量表（DBAS-16）</h2>
+
+  <h3>3.1 量表简介</h3>
+  <div class="card">
+    <p><strong>全称</strong>：Dysfunctional Beliefs and Attitudes about Sleep（睡眠信念与态度量表，16项简版）</p>
+    <p><strong>编制者</strong>：Charles M. Morin 教授团队（加拿大拉瓦尔大学），2007年</p>
+    <p><strong>原版基础</strong>：从原始30条目版本（DBAS-30）精简而来</p>
+    <p><strong>用途</strong>：评估个体对睡眠的<strong>不合理信念和态度</strong>，是失眠认知行为治疗（CBT-I）的核心评估工具</p>
+    <p><strong>条目数</strong>：16个条目</p>
+    <p><strong>完成时间</strong>：约5分钟</p>
+    <p><strong>适用人群</strong>：18岁以上成人</p>
+  </div>
+
+  <h3>3.2 四维度结构与完整16条目</h3>
+
+  <h4>维度一：失眠所致后果（Consequences of Insomnia）— 5题</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>题号</th><th>条目原文</th><th>中文翻译</th></tr>
+    <tr><td>5</td><td>After a poor night's sleep, I know that it will interfere with my daily activities on the next day.</td><td>当前一晚睡得不好，我知道隔天的活动一定会受到影响</td></tr>
+    <tr><td>7</td><td>When I feel irritable, depressed, or anxious during the day, it is mostly because I did not sleep well the night before.</td><td>如果我在白天感到焦躁、抑郁、焦虑，大部分是因为前一晚没睡好</td></tr>
+    <tr><td>9</td><td>Without an adequate night's sleep, I can hardly function the next day.</td><td>如果晚上没有适当的睡眠，隔天我简直没办法做事情</td></tr>
+    <tr><td>12</td><td>When I feel tired, have no energy, or just seem not to function well during the day, it is generally because I did not sleep well the night before.</td><td>如果我在白天感到累、没有精力、或是表现不好，通常是因为前一晚睡得不好</td></tr>
+    <tr><td>16</td><td>I avoid or cancel obligations (social, family) after a poor night's sleep.</td><td>如果我前一夜无法入眠，隔天会逃避或取消自己应该做的事（社会、家庭）</td></tr>
+  </table>
+  </div>
+
+  <h4>维度二：关于睡眠的担忧/无助感（Worry/Helplessness about Insomnia）— 6题</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>题号</th><th>条目原文</th><th>中文翻译</th></tr>
+    <tr><td>3</td><td>I am concerned that chronic insomnia may have serious consequences on my physical health.</td><td>我担心长期失眠会影响我的健康</td></tr>
+    <tr><td>4</td><td>I am worried that I may lose control over my abilities to sleep.</td><td>我担心自己失去控制睡眠的能力</td></tr>
+    <tr><td>8</td><td>When I sleep poorly on one night, I know it will disturb my sleep schedule for the whole week.</td><td>如果某个晚上我睡得不好，我知道整个星期的睡眠时间就会被打乱</td></tr>
+    <tr><td>10</td><td>I can't ever predict whether I'll have a good or poor night's sleep.</td><td>我始终没法预测自己的睡眠状况是好或是不好</td></tr>
+    <tr><td>11</td><td>I have little ability to manage the negative consequences of disturbed sleep.</td><td>我只有一点点能力可以处理睡眠困扰所产生的负面影响</td></tr>
+    <tr><td>14</td><td>I feel insomnia is ruining my ability to enjoy life and prevents me from doing what I want.</td><td>我觉得失眠摧毁自己享受生命的能力，而且让我不能随心所欲地做想做的事</td></tr>
+  </table>
+  </div>
+
+  <h4>维度三：对于睡眠的期望（Sleep Expectations）— 2题</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>题号</th><th>条目原文</th><th>中文翻译</th></tr>
+    <tr><td>1</td><td>I need 8 hours of sleep to feel refreshed and function well during the day.</td><td>我需要睡足8小时，白天才能够精力充沛和活动良好</td></tr>
+    <tr><td>2</td><td>When I don't get the proper amount of sleep on a given night, I need to catch up on the next day by napping or on the next night by sleeping longer.</td><td>当我一个晚上没有睡到足够的时间，我需要在第二天午睡或打盹，或晚上睡更长的时间</td></tr>
+  </table>
+  </div>
+
+  <h4>维度四：药物使用（Medication Use）— 3题</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>题号</th><th>条目原文</th><th>中文翻译</th></tr>
+    <tr><td>6</td><td>In order to be alert and function well during the day, I believe I would be better off taking a sleeping pill rather than having a poor night's sleep.</td><td>为了保持白天清醒的工作状态，我认为比较好的方式是吃助眠药物，而不是让自己一整晚睡不好</td></tr>
+    <tr><td>13</td><td>I believe insomnia is essentially the result of a chemical imbalance.</td><td>我相信失眠是因为体内化学物质不平衡所致</td></tr>
+    <tr><td>15</td><td>Medication is probably the only solution to sleeplessness.</td><td>药物是解决失眠问题的唯一方式</td></tr>
+  </table>
+  </div>
+
+  <h3>3.3 评分方法</h3>
+  <h4>原版计分（Morin 原版，临床研究推荐）：10点李克特量表（0～10分）</h4>
+  <ul>
+    <li><strong>0分</strong> = 完全不同意（Strongly Disagree）</li>
+    <li><strong>10分</strong> = 完全同意（Strongly Agree）</li>
+    <li><strong>总分计算</strong>：所有16个条目得分相加，再除以16，得出<strong>平均分（0～10分）</strong></li>
+    <li><strong>各维度得分</strong>：维度内条目得分相加后除以维度条目数</li>
+  </ul>
+
+  <h4>中译版常见计分（部分中文版）：5级评分（1～5分）</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>分数</th><th>含义</th></tr>
+    <tr><td>1分</td><td>非常同意</td></tr>
+    <tr><td>2分</td><td>同意</td></tr>
+    <tr><td>3分</td><td>一般</td></tr>
+    <tr><td>4分</td><td>不同意</td></tr>
+    <tr><td>5分</td><td>非常不同意</td></tr>
+  </table>
+  </div>
+  <blockquote>⚠️ <strong>注意方向差异</strong>：原版10点计分中 <strong>高分 = 不合理信念严重</strong>；部分中译版5级计分中 <strong>低分 = 不合理信念严重</strong>（因为"非常同意"计1分）。使用时务必确认计分方向！</blockquote>
+
+  <h4>各维度快速计算</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>维度</th><th>包含条目</th><th>条目数</th></tr>
+    <tr><td>失眠后果（Consequences）</td><td>5, 7, 9, 12, 16</td><td>5</td></tr>
+    <tr><td>担忧/无助感（Worry/Helplessness）</td><td>3, 4, 8, 10, 11, 14</td><td>6</td></tr>
+    <tr><td>睡眠期望（Sleep Expectations）</td><td>1, 2</td><td>2</td></tr>
+    <tr><td>药物使用（Medication）</td><td>6, 13, 15</td><td>3</td></tr>
+  </table>
+  </div>
+
+  <h3>3.4 结果解读</h3>
+  <h4>参考均值与切点（原版10点计分）</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>DBAS-16 平均分</th><th>解读</th></tr>
+    <tr><td><strong>&lt; 3.5</strong></td><td>睡眠信念基本健康合理</td></tr>
+    <tr><td><strong>3.5 左右</strong></td><td>筛查参考切点（灵敏度 89%，特异度 78%）</td></tr>
+    <tr><td><strong>≥ 4.0</strong></td><td>存在临床显著的不合理睡眠信念（需认知重构）</td></tr>
+    <tr><td><strong>&gt; 5.0</strong></td><td>不合理信念较严重</td></tr>
+  </table>
+  </div>
+
+  <h4>群体参考值（原版10点计分）</h4>
+  <div class="table-wrap">
+  <table>
+    <tr><th>群体</th><th>平均分（SD）</th></tr>
+    <tr><td>正常睡眠者</td><td>3.62（±1.33）</td></tr>
+    <tr><td>失眠患者</td><td>4.40（±1.49）</td></tr>
+  </table>
+  </div>
+
+  <h3>3.5 信效度</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>指标</th><th>数据</th></tr>
+    <tr><td>内部一致性（Cronbach's α）</td><td>0.77～0.79</td></tr>
+    <tr><td>重测信度（2周间隔）</td><td>r = 0.83</td></tr>
+    <tr><td>结构效度</td><td>4因子模型与DBAS-30一致</td></tr>
+    <tr><td>区分效度</td><td>可有效区分失眠患者与正常睡眠者</td></tr>
+    <tr><td>与ISI（失眠严重指数）相关</td><td>显著正相关</td></tr>
+    <tr><td>与PSQI相关</td><td>显著正相关</td></tr>
+  </table>
+  </div>
+
+  <h3>3.6 临床应用（CBT-I）</h3>
+  <p>DBAS-16 在失眠认知行为治疗（CBT-I）中的核心用途：</p>
+  <ol>
+    <li><strong>识别靶点</strong>：发现患者对睡眠的歪曲认知，确定认知重构的具体目标
+      <ul>
+        <li>条目1、2高分 → 对睡眠时长的僵化期望（"我必须睡满8小时"）</li>
+        <li>条目4、8、10高分 → 对睡眠的失控感与灾难化思维</li>
+        <li>条目6、15高分 → 过度依赖药物</li>
+      </ul>
+    </li>
+    <li><strong>制定方案</strong>：根据高分维度制定针对性的认知干预策略</li>
+    <li><strong>监测进程</strong>：在治疗过程中反复测量，追踪不合理信念的改变</li>
+    <li><strong>预测预后</strong>：基线分数较高的患者通常需要更密集的认知重构工作</li>
+  </ol>
+
+  <div class="divider"></div>
+
+  <!-- ==================== 四、对比总结 ==================== -->
+  <h2>四、三个量表对比总结</h2>
+  <div class="table-wrap">
+  <table class="compare-table">
+    <tr><th>对比维度</th><th>PSQI</th><th>SHPS</th><th>DBAS-16</th></tr>
+    <tr><td><strong>全称</strong></td><td>匹兹堡睡眠质量指数</td><td>睡眠卫生习惯量表</td><td>睡眠信念与态度量表（16项）</td></tr>
+    <tr><td><strong>评估内容</strong></td><td>主观睡眠质量</td><td>睡眠卫生行为与习惯</td><td>对睡眠的不合理信念</td></tr>
+    <tr><td><strong>评估时间范围</strong></td><td>近1个月</td><td>一般情况（特质性）</td><td>一般情况（特质性）</td></tr>
+    <tr><td><strong>条目数</strong></td><td>19自评 + 5他评</td><td>13～21题（视版本）</td><td>16题</td></tr>
+    <tr><td><strong>维度数</strong></td><td>7个成分</td><td>4个维度</td><td>4个维度</td></tr>
+    <tr><td><strong>完成时间</strong></td><td>5～10分钟</td><td>5～10分钟</td><td>约5分钟</td></tr>
+    <tr><td><strong>总分范围</strong></td><td>0～21</td><td>13～133（视版本）</td><td>平均分 0～10</td></tr>
+    <tr><td><strong>分数方向</strong></td><td>高分 = 差</td><td>高分 = 差</td><td>高分 = 不合理信念严重</td></tr>
+    <tr><td><strong>切点</strong></td><td>&gt;5（或&gt;7）</td><td>无统一标准</td><td>≥4.0</td></tr>
+    <tr><td><strong>内部一致性 α</strong></td><td>0.83～0.85</td><td>&gt; 0.70</td><td>0.77～0.79</td></tr>
+    <tr><td><strong>重测信度</strong></td><td>0.81～0.99</td><td>—</td><td>0.83</td></tr>
+    <tr><td><strong>CBT-I角色</strong></td><td>疗效评估结局指标</td><td>行为干预靶点评估</td><td>认知干预靶点评估</td></tr>
+  </table>
+  </div>
+
+  <h3>三者关系</h3>
+  <div class="card">
+    <ul>
+      <li><strong>PSQI</strong> 评估的是睡眠<strong>"结果"</strong>（睡得好不好）</li>
+      <li><strong>SHPS</strong> 评估的是睡眠<strong>"行为"</strong>（做了什么影响睡眠）</li>
+      <li><strong>DBAS-16</strong> 评估的是睡眠<strong>"认知"</strong>（对睡眠怎么想）</li>
+    </ul>
+    <p style="margin-top:12px;">三者结合使用，可从<strong>认知-行为-结果</strong>三个层面全面评估个体的睡眠状况，尤其适用于失眠的认知行为治疗（CBT-I）。</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ==================== 五、参考文献 ==================== -->
+  <h2>五、主要参考文献</h2>
+  <ol>
+    <li>Buysse DJ, Reynolds CF, Monk TH, et al. The Pittsburgh Sleep Quality Index: A new instrument for psychiatric practice and research. <em>Psychiatry Research</em>, 1989; 28(2): 193–213.</li>
+    <li>刘贤臣, 唐茂芹, 胡蕾, 等. 匹兹堡睡眠质量指数的信度和效度研究. <em>中华精神科杂志</em>, 1996; 29(2): 103–107.</li>
+    <li>林诗淳, 杨建铭, 许世杰, 郑中平. 睡眠卫生行为量表之信效度研究. <em>临床心理学刊</em>, 2009; 4(2): 105–115.</li>
+    <li>Morin CM, Vallières A, Ivers H. Dysfunctional beliefs and attitudes about sleep (DBAS): Validation of a brief version (DBAS-16). <em>Sleep</em>, 2007; 30(11): 1547–1554.</li>
+    <li>Carney CE, Edinger JD, Morin CM, et al. Examining maladaptive beliefs about sleep across insomnia patient groups. <em>Journal of Psychosomatic Research</em>, 2010; 68(1): 57–65.</li>
+  </ol>
+
+  <!-- 底部 -->
+  <div style="text-align:center;margin-top:40px;padding:20px 0;">
+    <a href="index.html" class="btn-back">← 返回测评</a>
+  </div>
+
+</div>
+
+<script>
+  // 星空动画（与主页一致）
+  (function() {
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    const stars = [];
+    const STAR_COUNT = 80;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < STAR_COUNT; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.2,
+        alpha: Math.random(),
+        speed: Math.random() * 0.012 + 0.004,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const s of stars) {
+        s.alpha += s.speed * Math.sin(Date.now() * 0.001 + s.phase) > 0 ? 0.006 : -0.006;
+        s.alpha = Math.max(0.15, Math.min(0.9, s.alpha));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200,210,255,${s.alpha})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+</script>
+
+</body>
+</html>
