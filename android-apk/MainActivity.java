@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
         ws.setBuiltInZoomControls(false); ws.setDisplayZoomControls(false);
         ws.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         wv.setWebViewClient(new WebViewClient());
-        wv.loadUrl("http://192.168.31.31:3000");
+        wv.loadUrl("https://f1046d674a2f82.lhr.life");
         setContentView(wv);
     }
     @Override public void onBackPressed() {
