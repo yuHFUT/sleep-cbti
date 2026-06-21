@@ -14,7 +14,7 @@ function getApiBase() {
   if (dynamic) return dynamic;
 
   // 回退：构建时预设的 API 地址
-  return 'https://olive-meals-vanish.loca.lt/api';
+  return 'https://deep-pandas-wave.loca.lt/api';
 }
 
 const request = axios.create({
