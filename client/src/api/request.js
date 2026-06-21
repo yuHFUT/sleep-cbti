@@ -1,9 +1,12 @@
 import axios from 'axios';
 
-const isEmbedded = window.location.hostname === 'localhost';
+// GitHub Pages 模式：前端在 Pages，API 走隧道
+const API_BASE = window.location.hostname.includes('github.io')
+  ? 'https://cba064a99f1c11.lhr.life/api'
+  : '/api';
 
 const request = axios.create({
-  baseURL: isEmbedded ? 'http://192.168.31.31:3000/api' : '/api',
+  baseURL: API_BASE,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 });
