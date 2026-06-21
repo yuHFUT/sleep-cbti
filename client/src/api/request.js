@@ -14,7 +14,7 @@ function getApiBase() {
   if (dynamic) return dynamic;
 
   // 回退：构建时预设的 API 地址
-  return 'https://rare-waves-pay.loca.lt/api';
+  return 'https://red-chicken-judge.loca.lt/api';
 }
 
 const request = axios.create({
