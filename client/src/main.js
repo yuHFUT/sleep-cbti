@@ -11,10 +11,14 @@ app.use(router);
 
 // 挂载前初始化认证状态
 async function initApp() {
-  // GitHub Pages 模式：动态加载 API 配置
-  if (window.location.hostname.includes('github.io')) {
+  // 生产部署模式：动态加载 API 配置（本地开发走 Vite 代理）
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (!isLocal) {
     try {
-      const resp = await fetch('/sleep-cbti/api-config.json');
+      // 优先尝试 /api-config.json（Netlify 等部署到根路径）
+      let resp = await fetch('/api-config.json');
+      // GitHub Pages 部署在子路径 /sleep-cbti/
+      if (!resp.ok) resp = await fetch('/sleep-cbti/api-config.json');
       if (resp.ok) {
         const config = await resp.json();
         if (config.apiBase) {

@@ -5,14 +5,16 @@ import axios from 'axios';
 // - GitHub Pages：优先从 localStorage 读取（由 api-config.json 写入），
 //   回退到硬编码的隧道地址
 function getApiBase() {
-  if (!window.location.hostname.includes('github.io')) {
-    return '/api';
-  }
-  // 优先用动态配置（app 启动时从 api-config.json 加载）
+  // 本地开发：Vite 代理 /api → localhost:3000
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (isLocal) return '/api';
+
+  // 生产部署：优先用 api-config.json 加载的地址
   const dynamic = localStorage.getItem('api_base');
   if (dynamic) return dynamic;
-  // 构建时的默认隧道 URL（通过 config.json 同步更新）
-  return 'https://f4d96171fff0bd.lhr.life/api';
+
+  // 回退：构建时预设的隧道 URL
+  return 'https://daf996cf3284c6.lhr.life/api';  // 与 public/api-config.json 保持同步
 }
 
 const request = axios.create({
