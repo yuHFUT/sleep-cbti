@@ -14,7 +14,7 @@ function getApiBase() {
   if (dynamic) return dynamic;
 
   // 回退：构建时预设的 API 地址
-  return 'https://some-donkeys-count.loca.lt/api';
+  return 'https://bitter-bananas-invent.loca.lt/api';
 }
 
 const request = axios.create({
