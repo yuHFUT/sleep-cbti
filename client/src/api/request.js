@@ -13,8 +13,8 @@ function getApiBase() {
   const dynamic = localStorage.getItem('api_base');
   if (dynamic) return dynamic;
 
-  // 回退：构建时预设的隧道 URL
-  return 'https://daf996cf3284c6.lhr.life/api';  // 与 public/api-config.json 保持同步
+  // 回退：构建时预设的 API 地址
+  return 'https://sleep-cbti-api.onrender.com/api';
 }
 
 const request = axios.create({
