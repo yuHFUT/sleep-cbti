@@ -14,7 +14,7 @@ function getApiBase() {
   if (dynamic) return dynamic;
 
   // 回退：构建时预设的 API 地址
-  return 'https://crazy-mails-divide.loca.lt/api';
+  return 'https://happy-pears-rush.loca.lt/api';
 }
 
 const request = axios.create({
