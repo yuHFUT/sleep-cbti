@@ -14,7 +14,24 @@ const JWT_EXPIRES_IN = '7d';
 // ============================================================
 
 async function initAuthTables() {
-  // 添加认证字段（如果不存在则忽略错误）
+  // 先创建 users 表（如果不存在）
+  try {
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(100) UNIQUE,
+        password_hash VARCHAR(255),
+        nickname VARCHAR(100),
+        role ENUM('user','admin') DEFAULT 'user',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ users 表已就绪');
+  } catch (err) {
+    console.error('创建 users 表失败:', err.message);
+  }
+
+  // 兼容旧表：补充可能缺失的字段
   const alterQueries = [
     `ALTER TABLE users ADD COLUMN username VARCHAR(100) UNIQUE`,
     `ALTER TABLE users ADD COLUMN password_hash VARCHAR(255)`,
